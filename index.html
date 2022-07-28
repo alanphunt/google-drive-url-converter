@@ -1,0 +1,51 @@
+<html lang="en">
+<head></head>
+<body>
+  <input type="file" id="file-selector" accept=".csv">
+
+  <script>
+    const fileSelector = document.getElementById('file-selector');
+    fileSelector.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const data = csvToArray(text)
+
+        var link = document.createElement('a');
+        link.download = 'imageUrls.csv';
+        var blob = new Blob([data.join("\n")], { type: 'text/plain' });
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+      };
+
+      reader.readAsText(file);
+    });
+
+    function returnImageUrl(driveUrl) {
+      return `http://drive.google.com/uc?id=${driveUrl.match(/[-\w]{25,}(?!.*[-\w]{25,})/)}`
+    }
+
+    function csvToArray(str, delimiter = "\r") {
+      // slice from start of text to the first \n index
+      // use split to create an array from string by delimiter
+      const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
+
+      // slice from \n index + 1 to the end of the text
+      // use split to create an array of each csv value row
+      const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+
+      // Map the rows
+      // split values from each row into an array
+      // use headers.reduce to create an object
+      // object properties derived from headers:values
+      // the object passed as an element of the array
+      const arr = rows.map(row => returnImageUrl(row.split(delimiter)[0]))
+      return ["image urls", ...arr]
+    }
+
+  </script>
+</body>
+
+</html>
